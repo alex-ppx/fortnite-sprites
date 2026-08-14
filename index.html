@@ -912,7 +912,10 @@ function viewAuth(){
 
     (accounts.length ? '<div class="panel"><h3>Войти</h3>' +
       '<p>Нажми на имя. Крестик — удалить профиль вместе с его отметками.</p>' +
-      '<div class="profs">' + list + '</div></div>' : "") +
+      '<div class="profs">' + list + '</div>' +
+      '<p style="margin:16px 0 0"><button id="wipe" style="font-size:12.5px;font-weight:700;color:#ff9a8b;' +
+        'text-decoration:underline;text-underline-offset:3px">Стереть всё на этом устройстве</button></p>' +
+      '</div>' : "") +
 
     '<div class="panel"><h3>' + (accounts.length ? "Новый профиль" : "Создать профиль") + '</h3>' +
       '<p>Это имя увидят друзья, когда ты пришлёшь им коллекцию.</p>' +
@@ -977,8 +980,21 @@ function render(){
 }
 
 /* ──────────────── события: вход ──────────────── */
+function bindWipe(){
+  var wp = document.getElementById("wipe");
+  if(!wp) return;
+  wp.onclick = function(){
+    if(!confirm("Стереть с этого устройства ВСЕ профили и отметки? Отменить будет нельзя.")) return;
+    if(!confirm("Точно? Профилей сейчас: " + accounts.length + ".")) return;
+    try{ localStorage.removeItem(K_ACC); localStorage.removeItem(K_SES); localStorage.removeItem("fns.howto"); }catch(e){}
+    accounts = []; hideHow = false; logout();
+    location.hash = "#/"; render(); toast("Всё стёрто");
+  };
+}
+
 function bindAuth(){
   var app = document.getElementById("app");
+  bindWipe();
 
   app.querySelectorAll("[data-login]").forEach(function(el){
     el.onclick = function(){ login(el.dataset.login); render(); };
@@ -1082,14 +1098,7 @@ function bind(){
   var hh = document.getElementById("hidehow");
   if(hh) hh.onclick = function(){ hideHow = true; save("fns.howto", true); render(); };
 
-  var wp = document.getElementById("wipe");
-  if(wp) wp.onclick = function(){
-    if(!confirm("Стереть с этого устройства ВСЕ профили и отметки? Отменить будет нельзя.")) return;
-    if(!confirm("Точно? Профилей сейчас: " + accounts.length + ".")) return;
-    try{ localStorage.removeItem(K_ACC); localStorage.removeItem(K_SES); localStorage.removeItem("fns.howto"); }catch(e){}
-    accounts = []; hideHow = false; logout();
-    location.hash = "#/"; render(); toast("Всё стёрто");
-  };
+  bindWipe();
 
   var cl = document.getElementById("cplink");
   if(cl) cl.onclick = function(){ copy(document.getElementById("mylink").value, "Ссылка скопирована"); };
