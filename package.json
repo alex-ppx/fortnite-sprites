@@ -1,0 +1,10 @@
+{
+  "name": "fortnite-sprites",
+  "private": true,
+  "description": "Sprite Tracker — трекер коллекции духов Fortnite",
+  "scripts": {
+    "check": "node tools/update-sprites.js --dry",
+    "update": "node tools/update-sprites.js"
+  },
+  "dependencies": { "playwright-core": "^1.49.1" }
+}
