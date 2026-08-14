@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sprite Tracker — все духи Fortnite</title>
+<meta name="description" content="Отмечай, какие духи Fortnite у тебя есть, делись коллекцией с друзьями и находи, чем обменяться.">
+<meta name="theme-color" content="#14161a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%91%BB%3C/text%3E%3C/svg%3E">
+<style>
+/* ─────────────────────── база ─────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#101216; --bg2:#171a20; --card:#1c2027; --line:#2b313b;
+  --tx:#eef1f5; --tx2:#98a3b3; --tx3:#6d7787;
+  --ok:#35d07f; --ok-dim:#1d7a4c;
+  --acc:#ffd83d;
+  --r:14px;
+  --shell:1360px;
+}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg); color:var(--tx);
+  font:400 15px/1.5 "Segoe UI Variable Display","Segoe UI",-apple-system,BlinkMacSystemFont,Inter,Roboto,Helvetica,Arial,sans-serif;
+  min-height:100vh; overflow-y:scroll;
+}
+body::before{
+  content:""; position:fixed; inset:0 0 auto 0; height:420px; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(900px 380px at 18% -8%, rgba(109,93,247,.30), transparent 65%),
+    radial-gradient(760px 340px at 84% -12%, rgba(0,175,255,.22), transparent 65%),
+    linear-gradient(180deg, #1b2030 0%, var(--bg) 100%);
+}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;color:inherit}
+button{background:none;border:none;cursor:pointer}
+.wrap{max-width:var(--shell); margin:0 auto; padding:0 18px}
+.hide{display:none !important}
+
+/* ─────────────────────── шапка ─────────────────────── */
+header{padding:26px 0 6px}
+.brand{display:flex; align-items:center; gap:12px; margin-bottom:22px; flex-wrap:wrap}
+.logo{
+  font-weight:800; font-size:19px; letter-spacing:-.02em; display:flex; align-items:center; gap:9px;
+}
+.logo b{
+  background:linear-gradient(92deg,#7b7cff,#60dfff 45%,#5dffe4);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.logo .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}
+.nav{display:flex; gap:6px; margin-left:auto; flex-wrap:wrap}
+.nav a{
+  padding:8px 14px; border-radius:10px; font-size:13.5px; font-weight:600; color:var(--tx2);
+  border:1px solid transparent; white-space:nowrap;
+}
+.nav a:hover{background:#ffffff0d; color:var(--tx)}
+.nav a.on{background:#ffffff12; color:var(--tx); border-color:var(--line)}
+.nav a .b{
+  display:inline-block; min-width:18px; padding:0 5px; margin-left:6px; border-radius:9px;
+  background:var(--acc); color:#1a1500; font-size:11px; font-weight:800; text-align:center; line-height:18px;
+}
+
+/* герой */
+.hero{
+  background:linear-gradient(180deg,#ffffff12,#ffffff06); border:1px solid var(--line);
+  border-radius:20px; padding:22px 24px; display:flex; align-items:center;
+  column-gap:26px; row-gap:16px; flex-wrap:wrap; backdrop-filter:blur(8px);
+}
+.hero .bar{margin-top:0; flex-basis:100%}
+.hero-l{flex:1 1 260px; min-width:0}
+.hero .who{flex-basis:100%; margin-top:0}
+.hero h1{font-size:26px; font-weight:800; letter-spacing:-.02em; line-height:1.15}
+.hero h1 span{display:block; font-size:13px; font-weight:500; color:var(--tx2); letter-spacing:0; margin-top:5px}
+.hero-r{margin-left:auto; display:flex; align-items:center; gap:22px; flex-wrap:wrap}
+.count{text-align:right}
+.count .big{font-size:34px; font-weight:800; letter-spacing:-.03em; line-height:1}
+.count .big i{font-style:normal; color:var(--tx3); font-size:20px; font-weight:700}
+.count .lbl{font-size:11px; font-weight:700; letter-spacing:.12em; color:var(--tx3); text-transform:uppercase; margin-top:6px}
+.ring{width:74px;height:74px;flex:none;position:relative}
+.ring svg{transform:rotate(-90deg)}
+.ring .pct{
+  position:absolute; inset:0; display:grid; place-items:center; font-size:14px; font-weight:800;
+}
+.bar{width:100%; height:7px; border-radius:99px; background:#ffffff14; overflow:hidden; margin-top:16px}
+.bar i{display:block; height:100%; background:linear-gradient(90deg,#5dffe4,#7b7cff); border-radius:99px; transition:width .35s ease}
+
+.who{
+  display:flex; align-items:center; gap:10px; margin-top:14px; font-size:13.5px; color:var(--tx2); flex-wrap:wrap;
+}
+.who input{
+  background:#00000047; border:1px solid var(--line); border-radius:9px; padding:7px 11px;
+  width:190px; font-size:13.5px; font-weight:600;
+}
+.who input:focus{outline:none; border-color:#6d5df7}
+
+/* кнопки */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:10px 16px; border-radius:11px; font-size:13.5px; font-weight:700;
+  background:#ffffff12; border:1px solid var(--line); transition:.15s; white-space:nowrap;
+}
+.btn:hover{background:#ffffff1f}
+.btn.pri{background:linear-gradient(96deg,#6d5df7,#8b5cf6); border-color:#8b7bff; color:#fff}
+.btn.pri:hover{filter:brightness(1.12)}
+.btn.ok{background:var(--ok-dim); border-color:var(--ok); color:#dcffe9}
+.btn.sm{padding:7px 12px; font-size:12.5px; border-radius:9px}
+.btn.gh{background:transparent}
+
+/* ─────────────────────── фильтры ─────────────────────── */
+.tools{
+  position:sticky; top:0; z-index:30; margin:22px 0 18px; padding:11px 0;
+  background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.tools .wrap{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.seg{display:flex; gap:4px; background:#ffffff0d; border:1px solid var(--line); border-radius:12px; padding:4px}
+.seg button{
+  padding:8px 15px; border-radius:9px; font-size:13.5px; font-weight:700; color:var(--tx2); transition:.15s;
+}
+.seg button:hover{color:var(--tx)}
+.seg button.on{background:#ffffff1c; color:var(--tx); box-shadow:0 1px 0 #ffffff14 inset}
+.seg button small{font-weight:700; color:var(--tx3); margin-left:6px; font-size:12px}
+.seg button.on small{color:var(--tx2)}
+.toggle{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--tx2); cursor:pointer; user-select:none}
+.toggle input{accent-color:#6d5df7; width:16px; height:16px; cursor:pointer}
+
+/* ─────────────────────── сетка ─────────────────────── */
+.famhead{
+  grid-column:1/-1; display:flex; align-items:baseline; gap:12px; margin:14px 0 -2px; padding-top:8px;
+}
+.famhead h3{font-size:15px; font-weight:800; letter-spacing:-.01em}
+.famhead em{font-style:normal; font-size:12px; font-weight:700; color:var(--tx3)}
+.famhead hr{flex:1; border:none; border-top:1px solid var(--line)}
+
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(178px,1fr)); gap:16px; padding-bottom:60px}
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--r); overflow:hidden;
+  display:flex; flex-direction:column; transition:transform .14s ease, border-color .14s;
+  position:relative;
+}
+.card:hover{transform:translateY(-3px)}
+.card.own{border-color:#2f6b4d}
+.art{
+  display:block; position:relative; aspect-ratio:1/1; border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, var(--g,#333) 0, transparent 100%);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--b,#555) 32%, transparent);
+}
+.art img{
+  width:100%; height:100%; object-fit:contain; padding:9%;
+  filter:grayscale(.75) brightness(.62); opacity:.62; transition:.18s;
+}
+.card.own .art img{filter:none; opacity:1}
+.card:hover .art img{transform:scale(1.05)}
+.tick{
+  position:absolute; top:9px; right:9px; width:24px; height:24px; border-radius:50%;
+  background:var(--ok); display:none; place-items:center; box-shadow:0 2px 10px #000a;
+}
+.card.own .tick{display:grid}
+.tick svg{width:14px;height:14px}
+.body{padding:11px 12px 12px; display:flex; flex-direction:column; gap:9px; flex:1}
+.nm{font-size:14.5px; font-weight:700; letter-spacing:-.01em; line-height:1.25}
+.meta{display:flex; gap:6px; flex-wrap:wrap; margin-top:-2px}
+.pill{
+  font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+  padding:3px 7px; border-radius:6px; background:#ffffff12; color:var(--tx2); white-space:nowrap;
+}
+.mark{
+  margin-top:auto; padding:9px; border-radius:9px; font-size:12.5px; font-weight:800;
+  background:#ffffff0d; border:1px solid var(--line); color:var(--tx2); transition:.15s;
+  text-transform:uppercase; letter-spacing:.04em;
+}
+.mark:hover{background:#ffffff1a; color:var(--tx)}
+.card.own .mark{background:var(--ok-dim); border-color:#2f8a5b; color:#dfffee}
+
+/* цвета редкости 1:1 с fortnite.gg */
+.r-common{background:#40464d;color:#b7bfc5}
+.r-rare{background:#00458a;color:#00fffb}
+.r-epic{background:#4c197b;color:#ec27ff}
+.r-legendary{background:#8a3c1e;color:#fbc363}
+.r-mythic{background:#7c5d26;color:#fff0a6}
+.r-special{
+  color:#000; background-size:430% 100%; animation:shine 12s linear infinite;
+  background-image:linear-gradient(15deg,#5dffe4 0,#8dff9a 8%,#fff36a 16%,#60dfff 24%,#7b7cff 32%,#ff77d8 40%,#ffc45f 48%,#5dffe4 56%,#8dff9a 64%,#fff36a 72%,#60dfff 80%,#7b7cff 88%,#ff77d8 96%,#ffc45f 100%);
+}
+@keyframes shine{0%{background-position:0 0}100%{background-position:430% 0}}
+@media (prefers-reduced-motion:reduce){.r-special{animation:none}}
+
+/* темы карточек 1:1 с fortnite.gg */
+.t-rare{--g:#104273;--b:#00afff}
+.t-epic{--g:#4d1566;--b:#ce59ff}
+.t-legendary{--g:#743e0a;--b:#de6e0e}
+.t-mythic{--g:#a89442;--b:#f1e198}
+.t-common{--g:#3a4048;--b:#7b838e}
+.t-gold{--g:#9d752a;--b:#f5b642}
+.t-candy{--g:#9f4540;--b:#f16f68}
+.t-galaxy{--g:#463b9e;--b:#6d5df7}
+.t-gem{--g:#7098a3;--b:#c9e7f2}
+.t-holofoil{--g:#a1428e;--b:#f07ad8}
+.t-cube{--g:#730974;--b:#8b008b}
+.t-quack{--g:#6941a2;--b:#a66bff}
+
+/* ─────────────────────── страница духа ─────────────────────── */
+.back{display:inline-flex; align-items:center; gap:7px; color:var(--tx2); font-size:13.5px; font-weight:700; margin:20px 0 18px}
+.back:hover{color:var(--tx)}
+.det{display:grid; grid-template-columns:minmax(0,380px) minmax(0,1fr); gap:34px; align-items:start}
+.det-art{
+  border:1px solid var(--line); border-radius:20px; aspect-ratio:1/1; position:relative; overflow:hidden;
+  background:radial-gradient(120% 90% at 50% 0%, var(--g,#333) 0%, #12141a 78%);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--b,#555) 34%, transparent), 0 24px 60px -30px #000;
+}
+.det-art img{width:100%;height:100%;object-fit:contain;padding:12%}
+.det h2{font-size:38px; font-weight:800; letter-spacing:-.03em; line-height:1.05}
+.det .sub{color:var(--tx2); font-size:14px; margin-top:9px}
+.det .meta{margin:16px 0 22px; gap:8px}
+.det .pill{font-size:11.5px; padding:5px 10px}
+.stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:24px}
+.stat{background:#ffffff0a; border:1px solid var(--line); border-radius:12px; padding:13px 15px}
+.stat .k{font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--tx3)}
+.stat .v{font-size:19px; font-weight:800; margin-top:5px; letter-spacing:-.01em}
+.det-act{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:28px}
+.det-act .btn{padding:13px 22px; font-size:14.5px}
+.fam{display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); gap:10px}
+.fam a{
+  border:1px solid var(--line); border-radius:11px; overflow:hidden; text-align:center; padding-bottom:7px;
+  background:var(--card); transition:.14s;
+}
+.fam a:hover{transform:translateY(-2px)}
+.fam a.cur{border-color:#6d5df7; box-shadow:0 0 0 1px #6d5df7}
+.fam a.own{border-color:#2f6b4d}
+.fam .ph{aspect-ratio:1/1; background:linear-gradient(180deg,var(--g,#333) 0,transparent 100%); position:relative}
+.fam img{width:100%;height:100%;object-fit:contain;padding:10%; filter:grayscale(.75) brightness(.62); opacity:.6}
+.fam a.own img{filter:none; opacity:1}
+.fam span{display:block; font-size:11px; font-weight:700; padding:6px 5px 0; color:var(--tx2); line-height:1.25}
+.fam a.own span{color:var(--tx)}
+.h4{font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--tx3); margin:0 0 12px}
+
+/* ─────────────────────── друзья / обмен ─────────────────────── */
+.page{padding-bottom:70px}
+.page h2{font-size:28px; font-weight:800; letter-spacing:-.02em; margin-bottom:8px}
+.page .lead{color:var(--tx2); font-size:14.5px; max-width:66ch; margin-bottom:24px}
+.panel{background:#ffffff08; border:1px solid var(--line); border-radius:16px; padding:20px; margin-bottom:18px}
+.panel h3{font-size:16px; font-weight:800; margin-bottom:6px}
+.panel p{color:var(--tx2); font-size:13.5px; margin-bottom:14px}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.field{
+  flex:1; min-width:220px; background:#00000047; border:1px solid var(--line); border-radius:10px;
+  padding:11px 13px; font-size:13.5px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.field:focus{outline:none; border-color:#6d5df7}
+.friends{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:14px}
+.fr{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 17px}
+.fr .top{display:flex; align-items:center; gap:11px; margin-bottom:13px}
+.av{
+  width:40px;height:40px;border-radius:11px; flex:none; display:grid; place-items:center;
+  font-weight:800; font-size:16px; color:#0d0f13;
+}
+.fr .nm2{font-size:15.5px; font-weight:800; letter-spacing:-.01em}
+.fr .dt{font-size:11.5px; color:var(--tx3); margin-top:2px}
+.fr .bar{margin:0 0 12px}
+.fr .num{font-size:12.5px; color:var(--tx2); margin-bottom:10px; font-weight:600}
+.fr .num b{color:var(--tx)}
+.fr .acts{display:flex; gap:7px}
+.empty{
+  border:1px dashed var(--line); border-radius:16px; padding:44px 24px; text-align:center; color:var(--tx2);
+}
+.empty b{display:block; color:var(--tx); font-size:16px; font-weight:800; margin-bottom:7px}
+
+/* обмен */
+.tradehead{display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin-bottom:22px}
+.tradehead select{
+  background:#00000047; border:1px solid var(--line); border-radius:10px; padding:10px 13px;
+  font-size:14px; font-weight:700; min-width:200px;
+}
+.sum{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:26px}
+.sum .stat .v{font-size:24px}
+.deal{
+  display:grid; grid-template-columns:1fr 46px 1fr; gap:12px; align-items:center;
+  background:#ffffff08; border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:10px;
+}
+.mini{display:flex; align-items:center; gap:11px; min-width:0}
+.mini .ph{
+  width:52px;height:52px;flex:none;border-radius:10px; overflow:hidden;
+  background:linear-gradient(180deg,var(--g,#333) 0,transparent 100%);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--b,#555) 34%, transparent);
+}
+.mini .ph img{width:100%;height:100%;object-fit:contain;padding:8%}
+.mini .tt{min-width:0}
+.mini .tt b{display:block; font-size:14px; font-weight:700; letter-spacing:-.01em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.mini .tt span{font-size:11.5px; color:var(--tx3); font-weight:600}
+.swap{display:grid; place-items:center; gap:3px}
+.swap .ic{font-size:17px; color:var(--tx3)}
+.swap .fair{font-size:9.5px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; text-align:center; line-height:1.2}
+.fair.f0{color:var(--ok)} .fair.f1{color:var(--acc)} .fair.f2{color:#ff8a6b}
+.cols{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+.col h3{font-size:15px; font-weight:800; margin-bottom:4px}
+.col .cap{font-size:12.5px; color:var(--tx3); margin-bottom:14px}
+.lst{display:flex; flex-direction:column; gap:8px}
+.lst .mini{background:#ffffff08; border:1px solid var(--line); border-radius:11px; padding:9px 11px}
+.lst .mini .rt{margin-left:auto; font-size:11.5px; font-weight:800; color:var(--tx3); white-space:nowrap}
+
+.toast{
+  position:fixed; left:50%; bottom:26px; transform:translate(-50%,140%); z-index:99;
+  background:#eef1f5; color:#12141a; font-weight:800; font-size:13.5px;
+  padding:12px 20px; border-radius:12px; box-shadow:0 14px 40px -12px #000; transition:transform .28s cubic-bezier(.2,.9,.3,1.2);
+}
+.toast.on{transform:translate(-50%,0)}
+
+footer{border-top:1px solid var(--line); padding:22px 0 40px; color:var(--tx3); font-size:12.5px}
+footer a{color:var(--tx2); text-decoration:underline; text-underline-offset:2px}
+
+@media (max-width:900px){
+  .det{grid-template-columns:1fr; gap:22px}
+  .det-art{max-width:330px}
+  .det h2{font-size:30px}
+  .cols{grid-template-columns:1fr}
+  .hero-r{margin-left:0}
+}
+@media (max-width:560px){
+  header{padding:16px 0 4px}
+  .brand{margin-bottom:14px; gap:8px}
+  .logo{font-size:17px}
+  .nav{margin-left:auto; gap:3px}
+  .nav a{padding:7px 10px; font-size:12.5px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:12px}
+  .hero{padding:16px; row-gap:12px}
+  .hero h1{font-size:20px}
+  .hero h1 span{font-size:12px; margin-top:3px}
+  .hero-l{flex:1 1 auto}
+  .hero-r{gap:12px}
+  .ring{display:none}
+  .count .big{font-size:26px}
+  .count .lbl{margin-top:3px; font-size:10px}
+  .who input{flex:1; width:auto; min-width:0}
+  .who label{font-size:12.5px}
+  .who .btn{flex-basis:100%}
+  .tools{margin:16px 0 14px}
+  .seg button{padding:8px 12px; font-size:13px}
+  .page h2{font-size:23px}
+  .det h2{font-size:26px}
+  .deal{grid-template-columns:1fr; gap:8px}
+  .swap{grid-auto-flow:column; justify-content:center; gap:8px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <div class="logo"><span class="dot"></span> <b>Sprite Tracker</b></div>
+      <nav class="nav">
+        <a href="#/" id="nav-all">Все духи</a>
+        <a href="#/friends" id="nav-fr">Друзья<span class="b hide" id="nav-fr-b">0</span></a>
+        <a href="#/trade" id="nav-tr">Обмен</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<footer>
+  <div class="wrap">
+    Данные и оформление духов — с <a href="https://fortnite.gg/sprites" target="_blank" rel="noopener">fortnite.gg/sprites</a>.
+    Фан-проект, не связан с Epic Games. Коллекция хранится только в твоём браузере.
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script>
+(function(){
+"use strict";
+
+var S = window.SPRITES;                 // порядок = порядок битов в коде. Не сортировать!
+var N = S.length;
+var BY_ID = {}; S.forEach(function(s,i){ s.i = i; BY_ID[s.id] = s; });
+
+/* ──────────────── хранилище ──────────────── */
+var K_ME = "fns.me", K_FR = "fns.friends";
+
+function load(k, def){
+  try{ var v = localStorage.getItem(k); return v ? JSON.parse(v) : def; }catch(e){ return def; }
+}
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+var me = load(K_ME, null) || { name:"", owned:[] };
+if(!Array.isArray(me.owned)) me.owned = [];
+var mine = new Set(me.owned);
+var friends = load(K_FR, []);
+if(!Array.isArray(friends)) friends = [];
+
+function saveMe(){ me.owned = Array.from(mine); save(K_ME, me); }
+function saveFriends(){ save(K_FR, friends); }
+
+/* ──────────────── код коллекции ──────────────── */
+// 117 позиций → 15 байт → 20 символов base64url. Позиция = индекс в SPRITES.
+function encode(set){
+  var b = new Uint8Array(Math.ceil(N/8));
+  for(var i=0;i<N;i++) if(set.has(S[i].id)) b[i>>3] |= (1 << (i & 7));
+  var str = ""; for(var j=0;j<b.length;j++) str += String.fromCharCode(b[j]);
+  return btoa(str).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+function decode(code){
+  code = String(code||"").trim().replace(/-/g,"+").replace(/_/g,"/");
+  while(code.length % 4) code += "=";
+  var str; try{ str = atob(code); }catch(e){ return null; }
+  var ids = [];
+  for(var i=0;i<N;i++){
+    var byte = str.charCodeAt(i>>3) || 0;
+    if(byte & (1 << (i & 7))) ids.push(S[i].id);
+  }
+  return ids;
+}
+
+function shareURL(name, set){
+  var base = location.origin + location.pathname;
+  return base + "#/add?n=" + encodeURIComponent(name || "Друг") + "&c=" + encode(set);
+}
+
+/* ──────────────── ценность духа для обмена ──────────────── */
+// 0% = сейчас не выпадает → самый труднодоступный. Дальше — чем реже дроп, тем ценнее.
+function tier(s){
+  if(s.d === 0) return 6;
+  if(s.d < 0.05) return 5;
+  if(s.d < 0.15) return 4;
+  if(s.d < 0.4)  return 3;
+  if(s.d < 1)    return 2;
+  return 1;
+}
+var TIER_NAME = {6:"вне ротации", 5:"экстра-редкий", 4:"очень редкий", 3:"редкий", 2:"нечастый", 1:"частый"};
+function byValue(a,b){
+  var t = tier(b) - tier(a);
+  if(t) return t;
+  if(a.d !== b.d) return (a.d === 0 ? -1 : b.d === 0 ? 1 : a.d - b.d);
+  return a.i - b.i;
+}
+
+/* ──────────────── мелочи ──────────────── */
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function theme(s){ return s.v === "base" ? s.r : s.v; }
+function vname(v){
+  return {base:"Обычный", gold:"Gold", candy:"Gummy", galaxy:"Galaxy",
+          gem:"Gem", holofoil:"Holofoil", cube:"Cube", quack:"Quack"}[v] || v;
+}
+function rate(s){ return s.d + "%"; }                                  // как на fortnite.gg
+function rateFull(s){ return s.d === 0 ? "не выпадает" : s.d + "%"; }  // с пояснением
+function img(s){ return "img/" + s.id + ".webp"; }
+function hue(str){ var h=0; for(var i=0;i<str.length;i++) h = (h*31 + str.charCodeAt(i)) % 360; return h; }
+function ago(ts){
+  if(!ts) return "";
+  var d = Math.floor((Date.now()-ts)/86400000);
+  if(d <= 0) return "сегодня";
+  if(d === 1) return "вчера";
+  if(d < 5) return d + " дня назад";
+  return d + " дней назад";
+}
+var toastT;
+function toast(msg){
+  var t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(function(){ t.classList.remove("on"); }, 2400);
+}
+function copy(text, msg){
+  var done = function(){ toast(msg || "Скопировано"); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done, function(){ fallback(); });
+  } else fallback();
+  function fallback(){
+    var ta = document.createElement("textarea");
+    ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); done(); }catch(e){ toast("Не удалось скопировать"); }
+    document.body.removeChild(ta);
+  }
+}
+
+/* ──────────────── карточка ──────────────── */
+function card(s){
+  var own = mine.has(s.id);
+  return '<div class="card t-' + theme(s) + (own ? " own" : "") + '" data-id="' + s.id + '">' +
+    '<a class="art" href="#/s/' + s.id + '">' +
+      '<img src="' + img(s) + '" loading="lazy" alt="' + esc(s.n) + ' Sprite" width="512" height="512">' +
+      '<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#0b2c1b" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>' +
+    '</a>' +
+    '<div class="body">' +
+      '<a class="nm" href="#/s/' + s.id + '">' + esc(s.n) + '</a>' +
+      '<div class="meta"><span class="pill r-' + s.r + '">' + s.r + '</span>' +
+        '<span class="pill">' + rate(s) + '</span></div>' +
+      '<button class="mark" data-toggle="' + s.id + '">' + (own ? "Есть" : "Нет") + '</button>' +
+    '</div></div>';
+}
+
+/* ──────────────── экран: все духи ──────────────── */
+var filter = "all", grouped = false;
+
+function viewGrid(){
+  var got = mine.size, pct = Math.round(got / N * 100);
+  var C = 2 * Math.PI * 32;
+
+  var list = S.filter(function(s){
+    return filter === "all" || (filter === "own") === mine.has(s.id);
+  });
+
+  var cards = "";
+  if(grouped){
+    var seen = {}, order = [];
+    S.forEach(function(s){ if(!seen[s.p]){ seen[s.p] = []; order.push(s.p); } seen[s.p].push(s); });
+    order.forEach(function(p){
+      var f = seen[p].filter(function(s){ return list.indexOf(s) > -1; });
+      if(!f.length) return;
+      var have = seen[p].filter(function(s){ return mine.has(s.id); }).length;
+      cards += '<div class="famhead"><h3>' + esc(seen[p][0].pn) + '</h3>' +
+               '<em>' + have + " / " + seen[p].length + '</em><hr></div>' +
+               f.map(card).join("");
+    });
+  } else {
+    cards = list.map(card).join("");
+  }
+  if(!cards) cards = '<div class="empty" style="grid-column:1/-1"><b>Тут пусто</b>' +
+    (filter === "own" ? "Ты пока не отметил ни одного духа." : "Ты собрал вообще всё. Красавчик.") + '</div>';
+
+  return '' +
+  '<div class="wrap">' +
+    '<div class="hero">' +
+      '<div class="hero-l">' +
+        '<h1>Все духи Fortnite<span>Отметь, какие у тебя есть — и поделись ссылкой с друзьями</span></h1>' +
+      '</div>' +
+      '<div class="hero-r">' +
+        '<div class="ring"><svg width="74" height="74">' +
+          '<circle cx="37" cy="37" r="32" stroke="#ffffff1a" stroke-width="7" fill="none"/>' +
+          '<circle cx="37" cy="37" r="32" stroke="url(#gg)" stroke-width="7" fill="none" stroke-linecap="round" ' +
+            'stroke-dasharray="' + C + '" stroke-dashoffset="' + (C - C * got / N) + '"/>' +
+          '<defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1">' +
+            '<stop offset="0" stop-color="#5dffe4"/><stop offset="1" stop-color="#7b7cff"/></linearGradient></defs>' +
+        '</svg><span class="pct">' + pct + '%</span></div>' +
+        '<div class="count"><div class="big">' + got + ' <i>/ ' + N + '</i></div><div class="lbl">собрано</div></div>' +
+      '</div>' +
+      '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="who"><label for="myname">Меня зовут</label>' +
+        '<input id="myname" maxlength="20" placeholder="твоё имя" value="' + esc(me.name) + '">' +
+        '<button class="btn pri sm" id="share">Поделиться коллекцией</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="tools"><div class="wrap">' +
+    '<div class="seg">' +
+      '<button data-f="all" class="' + (filter==="all"?"on":"") + '">Все<small>' + N + '</small></button>' +
+      '<button data-f="own" class="' + (filter==="own"?"on":"") + '">Есть<small>' + got + '</small></button>' +
+      '<button data-f="miss" class="' + (filter==="miss"?"on":"") + '">Нет<small>' + (N-got) + '</small></button>' +
+    '</div>' +
+    '<label class="toggle"><input type="checkbox" id="grp"' + (grouped?" checked":"") + '> Группировать по духу</label>' +
+  '</div></div>' +
+
+  '<div class="wrap"><div class="grid">' + cards + '</div></div>';
+}
+
+/* ──────────────── экран: один дух ──────────────── */
+function viewOne(id){
+  var s = BY_ID[id];
+  if(!s) return notFound();
+  var own = mine.has(s.id);
+  var fam = S.filter(function(x){ return x.p === s.p; });
+  var famHave = fam.filter(function(x){ return mine.has(x.id); }).length;
+
+  var whoHas = friends.filter(function(f){ return f.owned.indexOf(s.id) > -1; });
+  var whoNot = friends.filter(function(f){ return f.owned.indexOf(s.id) < 0; });
+
+  var social = "";
+  if(friends.length){
+    social = '<div class="panel" style="margin-top:26px"><h3>У друзей</h3><p style="margin:0">' +
+      (whoHas.length ? '<b style="color:var(--ok)">Есть у:</b> ' + whoHas.map(function(f){ return esc(f.name); }).join(", ") : "Нет ни у кого из друзей") +
+      (whoNot.length ? '<br><b style="color:var(--tx3)">Нет у:</b> ' + whoNot.map(function(f){ return esc(f.name); }).join(", ") : "") +
+      (own && whoNot.length ? '<br><br>💡 У тебя он есть — можешь предложить ' + esc(whoNot[0].name) + '.' : "") +
+      (!own && whoHas.length ? '<br><br>💡 Попроси у ' + esc(whoHas[0].name) + ' — у ' + (whoHas.length>1?"них":"него/неё") + ' есть.' : "") +
+      '</p></div>';
+  }
+
+  return '<div class="wrap page">' +
+    '<a class="back" href="#/">← Все духи</a>' +
+    '<div class="det">' +
+      '<div class="det-art t-' + theme(s) + '"><img src="' + img(s) + '" alt="' + esc(s.n) + ' Sprite" width="512" height="512"></div>' +
+      '<div>' +
+        '<h2>' + esc(s.n) + '</h2>' +
+        '<div class="sub">Дух семейства <b>' + esc(s.pn) + '</b> · вариант ' + vname(s.v) + '</div>' +
+        '<div class="meta"><span class="pill r-' + s.r + '">' + s.r + '</span>' +
+          '<span class="pill">' + rateFull(s) + '</span>' +
+          '<span class="pill">#' + s.id + '</span></div>' +
+        '<div class="stats">' +
+          '<div class="stat"><div class="k">Редкость</div><div class="v">' + s.r + '</div></div>' +
+          '<div class="stat"><div class="k">Шанс выпадения</div><div class="v">' + rateFull(s) + '</div></div>' +
+          '<div class="stat"><div class="k">Ценность в обмене</div><div class="v" style="font-size:15px">' + TIER_NAME[tier(s)] + '</div></div>' +
+        '</div>' +
+        '<div class="det-act">' +
+          '<button class="btn ' + (own ? "ok" : "pri") + '" data-toggle="' + s.id + '">' +
+            (own ? "✓ Есть у меня" : "Отметить, что есть") + '</button>' +
+          '<a class="btn gh" href="https://fortnite.gg/sprites/' + esc(s.s) + '" target="_blank" rel="noopener">Открыть на fortnite.gg ↗</a>' +
+        '</div>' +
+        '<div class="h4">Семейство ' + esc(s.pn) + ' — ' + famHave + ' / ' + fam.length + '</div>' +
+        '<div class="fam">' + fam.map(function(x){
+          return '<a class="t-' + theme(x) + (x.id===s.id?" cur":"") + (mine.has(x.id)?" own":"") + '" href="#/s/' + x.id + '">' +
+            '<div class="ph"><img src="' + img(x) + '" loading="lazy" alt="' + esc(x.n) + '"></div>' +
+            '<span>' + esc(vname(x.v)) + '</span></a>';
+        }).join("") + '</div>' +
+        social +
+      '</div>' +
+    '</div></div>';
+}
+
+/* ──────────────── экран: друзья ──────────────── */
+function viewFriends(){
+  var cards = friends.length ? friends.map(function(f, i){
+    var pct = Math.round(f.owned.length / N * 100);
+    var fs = new Set(f.owned);
+    var give = S.filter(function(s){ return mine.has(s.id) && !fs.has(s.id); }).length;
+    var get  = S.filter(function(s){ return !mine.has(s.id) && fs.has(s.id); }).length;
+    return '<div class="fr">' +
+      '<div class="top">' +
+        '<div class="av" style="background:hsl(' + hue(f.name) + ' 70% 62%)">' + esc(f.name.charAt(0).toUpperCase() || "?") + '</div>' +
+        '<div><div class="nm2">' + esc(f.name) + '</div><div class="dt">обновлено ' + ago(f.ts) + '</div></div>' +
+      '</div>' +
+      '<div class="num">Собрал <b>' + f.owned.length + ' / ' + N + '</b> · ' + pct + '%</div>' +
+      '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="num">Ты можешь дать <b>' + give + '</b> · получить <b>' + get + '</b></div>' +
+      '<div class="acts"><a class="btn sm pri" href="#/trade/' + i + '">Обмен</a>' +
+        '<button class="btn sm" data-del="' + i + '">Удалить</button></div>' +
+    '</div>';
+  }).join("") : '<div class="empty" style="grid-column:1/-1"><b>Друзей пока нет</b>' +
+      'Попроси друга открыть этот сайт, отметить своих духов и прислать тебе ссылку «Поделиться коллекцией». ' +
+      'Открой её — и он появится здесь.</div>';
+
+  return '<div class="wrap page">' +
+    '<h2>Друзья</h2>' +
+    '<p class="lead">Тут лежат коллекции друзей. Никакой регистрации: каждый отмечает духов у себя, ' +
+    'жмёт «Поделиться коллекцией» и кидает ссылку — вы просто открываете ссылки друг друга.</p>' +
+
+    '<div class="panel"><h3>Твоя ссылка</h3>' +
+      '<p>Отправь её друзьям — они увидят твою коллекцию и смогут предложить обмен.</p>' +
+      '<div class="row"><input class="field" id="mylink" readonly value="' + esc(shareURL(me.name, mine)) + '">' +
+      '<button class="btn pri" id="cplink">Скопировать</button></div></div>' +
+
+    '<div class="panel"><h3>Добавить друга вручную</h3>' +
+      '<p>Если ссылка не открылась — вставь сюда её целиком или только код коллекции.</p>' +
+      '<div class="row"><input class="field" id="pastecode" placeholder="ссылка или код"><input class="field" id="pastename" style="flex:0 1 190px;min-width:150px;font-family:inherit" placeholder="имя друга">' +
+      '<button class="btn" id="addfr">Добавить</button></div></div>' +
+
+    '<div class="friends">' + cards + '</div></div>';
+}
+
+/* ──────────────── экран: обмен (шаг 2) ──────────────── */
+function viewTrade(idx){
+  if(!friends.length){
+    return '<div class="wrap page"><h2>Обмен</h2>' +
+      '<p class="lead">Помощник по обмену показывает, каких духов ты можешь отдать другу, каких взять у него, ' +
+      'и подбирает равноценные пары.</p>' +
+      '<div class="empty"><b>Сначала добавь друга</b>Ему нужно открыть сайт, отметить своих духов и прислать тебе ссылку.<br><br>' +
+      '<a class="btn pri" href="#/friends">Как это сделать</a></div></div>';
+  }
+  idx = Math.max(0, Math.min(friends.length - 1, parseInt(idx, 10) || 0));
+  var f = friends[idx];
+  var fs = new Set(f.owned);
+
+  var give = S.filter(function(s){ return mine.has(s.id) && !fs.has(s.id); }).sort(byValue);
+  var get  = S.filter(function(s){ return !mine.has(s.id) && fs.has(s.id); }).sort(byValue);
+  var both = S.filter(function(s){ return mine.has(s.id) && fs.has(s.id); }).length;
+  var none = N - give.length - get.length - both;
+
+  // равноценные пары: самое ценное к самому ценному
+  var pairs = [], n = Math.min(give.length, get.length);
+  for(var i=0;i<n;i++) pairs.push([give[i], get[i]]);
+
+  var mini = function(s, showRate){
+    return '<div class="mini t-' + theme(s) + '">' +
+      '<a class="ph" href="#/s/' + s.id + '"><img src="' + img(s) + '" loading="lazy" alt=""></a>' +
+      '<a class="tt" href="#/s/' + s.id + '"><b>' + esc(s.n) + '</b><span>' + s.r + " · " + rateFull(s) + '</span></a>' +
+      (showRate ? '<span class="rt">' + TIER_NAME[tier(s)] + '</span>' : "") + '</div>';
+  };
+
+  var deals = pairs.length ? pairs.slice(0, 12).map(function(p){
+    var d = Math.abs(tier(p[0]) - tier(p[1]));
+    var cls = d === 0 ? "f0" : d === 1 ? "f1" : "f2";
+    var lbl = d === 0 ? "равный" : d === 1 ? "почти равный" : "неравный";
+    return '<div class="deal">' + mini(p[0]) +
+      '<div class="swap"><span class="ic">⇄</span><span class="fair ' + cls + '">' + lbl + '</span></div>' +
+      mini(p[1]) + '</div>';
+  }).join("") : '<div class="empty">Обмениваться нечем: либо у вас одинаковые коллекции, либо кто-то один пока ничего не отметил.</div>';
+
+  var txt = "Обмен духами: " + (me.name || "я") + " ⇄ " + f.name + "\n\n" +
+    "Могу отдать (" + give.length + "):\n" + (give.slice(0,25).map(function(s){ return "· " + s.n + " (" + rateFull(s) + ")"; }).join("\n") || "—") +
+    (give.length > 25 ? "\n… и ещё " + (give.length-25) : "") +
+    "\n\nХочу забрать (" + get.length + "):\n" + (get.slice(0,25).map(function(s){ return "· " + s.n + " (" + rateFull(s) + ")"; }).join("\n") || "—") +
+    (get.length > 25 ? "\n… и ещё " + (get.length-25) : "");
+
+  return '<div class="wrap page">' +
+    '<h2>Помощник по обмену</h2>' +
+    '<p class="lead">Сравниваю твою коллекцию с коллекцией друга. Чем реже дух выпадает, тем он ценнее — ' +
+    'пары подобраны так, чтобы обмен был примерно равным.</p>' +
+
+    '<div class="tradehead">' +
+      '<label style="font-weight:700;color:var(--tx2)">Меняюсь с</label>' +
+      '<select id="pick">' + friends.map(function(x,i){
+        return '<option value="' + i + '"' + (i===idx?" selected":"") + '>' + esc(x.name) + '</option>'; }).join("") + '</select>' +
+      '<button class="btn" id="cptrade">Скопировать список для друга</button>' +
+    '</div>' +
+
+    '<div class="sum">' +
+      '<div class="stat"><div class="k">Ты можешь отдать</div><div class="v" style="color:var(--ok)">' + give.length + '</div></div>' +
+      '<div class="stat"><div class="k">Ты можешь получить</div><div class="v" style="color:#7ec8ff">' + get.length + '</div></div>' +
+      '<div class="stat"><div class="k">Есть у обоих</div><div class="v">' + both + '</div></div>' +
+      '<div class="stat"><div class="k">Нет ни у кого</div><div class="v" style="color:var(--tx3)">' + none + '</div></div>' +
+    '</div>' +
+
+    '<div class="h4">Предложить обмен</div>' + deals +
+
+    '<div class="cols" style="margin-top:34px">' +
+      '<div class="col"><h3 style="color:var(--ok)">Ты отдаёшь → ' + esc(f.name) + '</h3>' +
+        '<div class="cap">' + give.length + ' духов есть у тебя и нет у друга. Сверху — самые ценные.</div>' +
+        '<div class="lst">' + (give.map(function(s){ return mini(s,true); }).join("") || '<div class="empty">Нечего отдать</div>') + '</div></div>' +
+      '<div class="col"><h3 style="color:#7ec8ff">' + esc(f.name) + ' → отдаёт тебе</h3>' +
+        '<div class="cap">' + get.length + ' духов есть у друга и нет у тебя.</div>' +
+        '<div class="lst">' + (get.map(function(s){ return mini(s,true); }).join("") || '<div class="empty">Нечего взять</div>') + '</div></div>' +
+    '</div>' +
+    '<textarea id="tradetext" class="hide">' + esc(txt) + '</textarea>' +
+  '</div>';
+}
+
+/* ──────────────── экран: приняли ссылку друга ──────────────── */
+function viewAdd(q){
+  var name = (q.n || "Друг").slice(0, 20);
+  var ids = decode(q.c);
+  if(!ids) return notFound();
+
+  addFriend(name, ids);
+  var f = friends.find(function(x){ return x.key === name.toLowerCase(); });
+  var fs = new Set(ids);
+  var give = S.filter(function(s){ return mine.has(s.id) && !fs.has(s.id); }).length;
+  var get  = S.filter(function(s){ return !mine.has(s.id) && fs.has(s.id); }).length;
+  var i = friends.indexOf(f);
+
+  return '<div class="wrap page">' +
+    '<div class="panel" style="text-align:center;padding:44px 24px">' +
+      '<div class="av" style="width:64px;height:64px;font-size:26px;border-radius:18px;margin:0 auto 16px;background:hsl(' + hue(name) + ' 70% 62%)">' + esc(name.charAt(0).toUpperCase()) + '</div>' +
+      '<h2 style="margin-bottom:10px">' + esc(name) + ' поделился коллекцией</h2>' +
+      '<p class="lead" style="margin:0 auto 22px">Собрано <b>' + ids.length + ' / ' + N + '</b>. ' +
+        'Сохранил в твой список друзей.<br>Ты можешь отдать <b style="color:var(--ok)">' + give + '</b>, ' +
+        'а получить <b style="color:#7ec8ff">' + get + '</b>.</p>' +
+      '<div class="row" style="justify-content:center">' +
+        '<a class="btn pri" href="#/trade/' + i + '">Что менять →</a>' +
+        '<a class="btn" href="#/">Мои духи</a>' +
+        '<a class="btn" href="#/friends">Все друзья</a>' +
+      '</div>' +
+    '</div></div>';
+}
+
+function addFriend(name, ids){
+  var key = name.toLowerCase();
+  var ex = friends.filter(function(x){ return x.key === key; })[0];
+  if(ex){ ex.owned = ids; ex.ts = Date.now(); ex.name = name; }
+  else friends.push({ key:key, name:name, owned:ids, ts:Date.now() });
+  saveFriends();
+}
+
+function notFound(){
+  return '<div class="wrap page"><div class="empty"><b>Не нашлось</b>Такой страницы или духа нет.<br><br>' +
+    '<a class="btn pri" href="#/">К списку духов</a></div></div>';
+}
+
+/* ──────────────── роутер ──────────────── */
+function parseHash(){
+  var h = location.hash.replace(/^#\/?/, "");
+  var qi = h.indexOf("?"), q = {};
+  if(qi > -1){
+    h.slice(qi + 1).split("&").forEach(function(kv){
+      var p = kv.split("=");
+      if(p[0]) q[decodeURIComponent(p[0])] = decodeURIComponent((p[1] || "").replace(/\+/g, " "));
+    });
+    h = h.slice(0, qi);
+  }
+  return { parts: h.split("/").filter(Boolean), q: q };
+}
+
+function render(){
+  var r = parseHash(), p = r.parts, html, tab = "all";
+  if(p[0] === "s")            { html = viewOne(parseInt(p[1], 10)); }
+  else if(p[0] === "friends") { html = viewFriends(); tab = "fr"; }
+  else if(p[0] === "trade")   { html = viewTrade(p[1]); tab = "tr"; }
+  else if(p[0] === "add")     { html = viewAdd(r.q); tab = "fr"; }
+  else                        { html = viewGrid(); }
+
+  document.getElementById("app").innerHTML = html;
+  ["all","fr","tr"].forEach(function(k){
+    document.getElementById("nav-" + k).classList.toggle("on", k === tab);
+  });
+  var b = document.getElementById("nav-fr-b");
+  b.textContent = friends.length;
+  b.classList.toggle("hide", !friends.length);
+  bind();
+}
+
+/* ──────────────── события ──────────────── */
+function bind(){
+  var app = document.getElementById("app");
+
+  app.querySelectorAll("[data-toggle]").forEach(function(el){
+    el.onclick = function(e){
+      e.preventDefault();
+      var id = parseInt(el.dataset.toggle, 10);
+      if(mine.has(id)) mine.delete(id); else mine.add(id);
+      saveMe();
+      var node = app.querySelector('.card[data-id="' + id + '"]');
+      if(node && parseHash().parts[0] !== "s"){
+        // точечное обновление, чтобы не терять позицию прокрутки
+        var own = mine.has(id);
+        node.classList.toggle("own", own);
+        node.querySelector(".mark").textContent = own ? "Есть" : "Нет";
+        refreshCounters();
+        if(filter !== "all") render();
+      } else render();
+    };
+  });
+
+  app.querySelectorAll("[data-f]").forEach(function(el){
+    el.onclick = function(){ filter = el.dataset.f; render(); window.scrollTo(0, 0); };
+  });
+
+  var grp = document.getElementById("grp");
+  if(grp) grp.onchange = function(){ grouped = grp.checked; render(); };
+
+  var nm = document.getElementById("myname");
+  if(nm) nm.oninput = function(){ me.name = nm.value.trim().slice(0,20); saveMe(); };
+
+  var sh = document.getElementById("share");
+  if(sh) sh.onclick = function(){
+    if(!me.name){
+      var v = prompt("Как тебя зовут? Друзья увидят это имя:", "");
+      if(!v) return;
+      me.name = v.trim().slice(0,20); saveMe();
+      if(nm) nm.value = me.name;
+    }
+    copy(shareURL(me.name, mine), "Ссылка скопирована — кидай друзьям");
+  };
+
+  var cl = document.getElementById("cplink");
+  if(cl) cl.onclick = function(){ copy(document.getElementById("mylink").value, "Ссылка скопирована"); };
+
+  var af = document.getElementById("addfr");
+  if(af) af.onclick = function(){
+    var raw = document.getElementById("pastecode").value.trim();
+    var nmv = document.getElementById("pastename").value.trim();
+    if(!raw) return toast("Вставь ссылку или код");
+    var code = raw, m = raw.match(/[?&]c=([A-Za-z0-9_-]+)/);
+    if(m) code = m[1];
+    var mn = raw.match(/[?&]n=([^&]+)/);
+    if(!nmv && mn) { try{ nmv = decodeURIComponent(mn[1]); }catch(e){} }
+    var ids = decode(code);
+    if(!ids) return toast("Код не распознан");
+    addFriend((nmv || "Друг").slice(0,20), ids);
+    location.hash = "#/friends"; render(); toast("Друг добавлен");
+  };
+
+  app.querySelectorAll("[data-del]").forEach(function(el){
+    el.onclick = function(){
+      var i = parseInt(el.dataset.del, 10);
+      if(!confirm("Удалить " + friends[i].name + " из списка?")) return;
+      friends.splice(i, 1); saveFriends(); render();
+    };
+  });
+
+  var pick = document.getElementById("pick");
+  if(pick) pick.onchange = function(){ location.hash = "#/trade/" + pick.value; };
+
+  var ct = document.getElementById("cptrade");
+  if(ct) ct.onclick = function(){ copy(document.getElementById("tradetext").value, "Список скопирован"); };
+}
+
+function refreshCounters(){
+  var got = mine.size, pct = Math.round(got / N * 100), C = 2 * Math.PI * 32;
+  var big = document.querySelector(".count .big");
+  if(big) big.innerHTML = got + ' <i>/ ' + N + '</i>';
+  var pc = document.querySelector(".ring .pct"); if(pc) pc.textContent = pct + "%";
+  var ring = document.querySelectorAll(".ring circle")[1];
+  if(ring) ring.setAttribute("stroke-dashoffset", C - C * got / N);
+  var bar = document.querySelector(".hero .bar i"); if(bar) bar.style.width = pct + "%";
+  var segs = document.querySelectorAll(".seg small");
+  if(segs.length === 3){ segs[1].textContent = got; segs[2].textContent = N - got; }
+  var ml = document.getElementById("mylink"); if(ml) ml.value = shareURL(me.name, mine);
+  // счётчики по семействам
+  document.querySelectorAll(".famhead").forEach(function(h){
+    var name = h.querySelector("h3").textContent;
+    var fam = S.filter(function(s){ return s.pn === name; });
+    h.querySelector("em").textContent = fam.filter(function(s){ return mine.has(s.id); }).length + " / " + fam.length;
+  });
+}
+
+window.addEventListener("hashchange", function(){ render(); window.scrollTo(0, 0); });
+render();
+})();
+</script>
+</body>
+</html>
